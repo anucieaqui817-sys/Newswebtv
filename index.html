@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>News Web</title>
+
+<!-- Video.js CSS -->
+<link href="https://vjs.zencdn.net/8.9.0/video-js.css" rel="stylesheet" />
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #000;
+        color: white;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+    .login-container {
+        text-align: center;
+    }
+    .login-container img {
+        width: 180px;
+        margin-bottom: 20px;
+    }
+    input {
+        display: block;
+        width: 250px;
+        padding: 10px;
+        margin: 10px auto;
+        border: none;
+        border-radius: 5px;
+    }
+    button {
+        padding: 10px 20px;
+        background-color: purple;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .player-container {
+        display: none;
+        width: 100%;
+        height: 100%;
+        position: relative;
+    }
+    .watermark {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        width: 80px;
+        opacity: 0.8;
+        z-index: 999;
+    }
+    video {
+        width: 100%;
+        height: 100%;
+    }
+</style>
+</head>
+<body>
+
+<div class="login-container" id="loginScreen">
+    <img src="https://i.imgur.com/3X9HqfJ.png" alt="News Web Logo">
+    <input type="text" id="username" placeholder="Usuário">
+    <input type="password" id="password" placeholder="Senha">
+    <button onclick="login()">Entrar</button>
+</div>
+
+<div class="player-container" id="playerScreen">
+    <img src="https://i.imgur.com/3X9HqfJ.png" class="watermark" alt="Marca d'água">
+    <video id="my_video" class="video-js vjs-default-skin" controls preload="auto"></video>
+</div>
+
+<!-- Scripts do Video.js e HLS.js -->
+<script src="https://vjs.zencdn.net/8.9.0/video.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<script>
+function login() {
+    let user = document.getElementById("username").value.trim();
+    let pass = document.getElementById("password").value.trim();
+
+    if (!user || !pass) {
+        alert("Preencha usuário e senha!");
+        return;
+    }
+
+    let streamUrl = `http://tecplay.online:80/get.php?username=${user}&password=${pass}&type=m3u_plus&output=ts`;
+
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("playerScreen").style.display = "block";
+
+    let video = document.getElementById('my_video');
+
+    if (Hls.isSupported()) {
+        let hls = new Hls({ liveSyncDuration: 3 });
+        hls.loadSource(streamUrl);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.ERROR, function(event, data) {
+            console.warn("Erro detectado:", data);
+            if (data.fatal) {
+                hls.startLoad(); // tenta reconectar
+            }
+        });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = streamUrl;
+    }
+
+    video.play();
+}
+</script>
+
+</body>
+</html>
