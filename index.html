@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Mobile Pad+</title>
+    <style>
+        :root {
+            --bg: #282c34;
+            --text: #abb2bf;
+            --accent: #61afef;
+        }
+        body { margin: 0; font-family: sans-serif; background: var(--bg); color: var(--text); }
+        
+        /* Painel Superior */
+        .toolbar {
+            display: flex; gap: 10px; padding: 10px;
+            background: #21252b; border-bottom: 1px solid #181a1f;
+        }
+        button {
+            background: var(--accent); border: none; padding: 8px 15px;
+            border-radius: 4px; color: white; font-weight: bold;
+        }
+
+        /* Área de Edição */
+        #editor {
+            width: 100%; height: calc(100vh - 60px);
+            background: transparent; color: inherit;
+            border: none; padding: 15px; box-sizing: border-box;
+            font-family: 'Courier New', monospace; font-size: 16px;
+            resize: none; outline: none;
+        }
+
+        /* Status Bar */
+        .status { font-size: 12px; padding: 5px 15px; opacity: 0.6; }
+    </style>
+</head>
+<body>
+
+    <div class="toolbar">
+        <button onclick="downloadFile()">Salvar .txt</button>
+        <button onclick="clearText()">Limpar</button>
+    </div>
+
+    <textarea id="editor" placeholder="Comece a digitar sua nota..."></textarea>
+    
+    <div class="status" id="status">Linhas: 1</div>
+
+    <script>
+        const editor = document.getElementById('editor');
+        const status = document.getElementById('status');
+
+        // Salva automaticamente o que você digita no navegador (Local Storage)
+        editor.value = localStorage.getItem('savedNote') || "";
+
+        editor.addEventListener('input', () => {
+            localStorage.setItem('savedNote', editor.value);
+            const lines = editor.value.split('\n').length;
+            status.innerText = `Linhas: ${lines}`;
+        });
+
+        function downloadFile() {
+            const text = editor.value;
+            const blob = new Blob([text], { type: "text/plain" });
+            const anchor = document.createElement("a");
+            anchor.download = "nota.txt";
+            anchor.href = window.URL.createObjectURL(blob);
+            anchor.click();
+        }
+
+        function clearText() {
+            if(confirm("Deseja apagar tudo?")) {
+                editor.value = "";
+                localStorage.setItem('savedNote', "");
+            }
+        }
+    </script>
+</body>
+</html>
